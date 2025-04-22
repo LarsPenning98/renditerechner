@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="de">
+<!DOCTYPE html><html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -66,23 +65,20 @@
 </head>
 <body>
   <div class="container">
-    <h1 style="text-align: center;">Einkommensteuer-Rechner 2025</h1>
+    <h1 style="text-align: center;">Einkommensteuer-Rechner 2025</h1><label for="modus">Eingabemodus:</label>
+<select id="modus">
+  <option value="monatlich">Monatliches Bruttogehalt</option>
+  <option value="jaehrlich">Jährliches Bruttogehalt</option>
+</select>
 
-    <label for="modus">Eingabemodus:</label>
-    <select id="modus">
-      <option value="monatlich">Monatliches Bruttogehalt</option>
-      <option value="jaehrlich">Jährliches Bruttogehalt</option>
-    </select>
+<label for="brutto">Bruttogehalt:</label>
+<input type="number" id="brutto" placeholder="z. B. 3500">
 
-    <label for="brutto">Bruttogehalt:</label>
-    <input type="number" id="brutto" placeholder="z. B. 3500">
+<button onclick="berechneSteuer()">Berechnen</button>
 
-    <button onclick="berechneSteuer()">Berechnen</button>
+<div class="result" id="ergebnis"></div>
 
-    <div class="result" id="ergebnis"></div>
-  </div>
-
-  <script>
+  </div>  <script>
     function est2025(zve) {
       if (zve <= 12096) return 0;
       if (zve <= 17443) {
@@ -95,6 +91,10 @@
       }
       if (zve <= 277825) return 0.42 * zve - 10911.92;
       return 0.45 * zve - 19246.67;
+    }
+
+    function formatDE(num) {
+      return num.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
     function berechneSteuer() {
@@ -116,13 +116,12 @@
       const grenz = estPlus1 - est;
 
       document.getElementById('ergebnis').innerHTML = `
-        <strong>Jährliches Bruttogehalt:</strong> ${jahresBrutto.toFixed(2)} €<br>
-        <strong>Zu versteuerndes Einkommen (zvE):</strong> ${zve.toFixed(2)} €<br>
-        <strong>Einkommensteuer:</strong> ${est.toFixed(2)} €<br>
+        <strong>Jährliches Bruttogehalt:</strong> ${formatDE(jahresBrutto)} €<br>
+        <strong>Zu versteuerndes Einkommen (zvE):</strong> ${formatDE(zve)} €<br>
+        <strong>Einkommensteuer:</strong> ${formatDE(est)} €<br>
         <strong>Persönlicher Durchschnittssteuersatz:</strong> ${(durchschnitt * 100).toFixed(2)} %<br>
         <strong>Grenzsteuersatz:</strong> ${(grenz * 100).toFixed(2)} %
       `;
     }
-  </script>
-</body>
+  </script></body>
 </html>
