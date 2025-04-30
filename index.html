@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vermietungsrechner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+            text-align: left;
+        }
+        label, input, select {
+            display: block;
+            margin: 10px 0;
+        }
+        .small-info {
+            font-size: 0.9em;
+            color: #555;
+            margin-top: -10px;
+            margin-bottom: 10px;
+        }
+        #result, #result_ferien {
+            background-color: #d1ffd1;
+            color: #006400;
+            padding: 15px;
+            border: 2px solid #006400;
+            border-radius: 8px;
+            font-size: 1.2em;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        .calculate-button {
+            margin-top: 10px;
+            padding: 10px 15px;
+            font-size: 1em;
+            background-color: #006400;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .calculate-button:hover {
+            background-color: #004d00;
+        }
+    </style>
+</head>
+<body>
+<script>
+function calculateRendite() {
+    const preis = parseFloat(document.getElementById("price").value) || 0;
+    const ruecklage = parseFloat(document.getElementById("ruecklage").value) || 0;
+    const tage = parseInt(document.getElementById("tage").value) || 0;
+    const monteure = 4;
+
+    const einnahmen = preis * tage * monteure;
+    const ausgaben = 1000 + 33 + 70 + 25 + 50 + 8.5 + 10 + 35 + ruecklage;
+    const rendite = einnahmen - ausgaben;
+    const renditeOhneRuecklage = einnahmen - (ausgaben - ruecklage);
+
+    document.getElementById("ausgaben-betrag").textContent = `${ausgaben.toFixed(2)} €`;
+    document.getElementById("einnahmen").textContent = `Einnahmen: ${einnahmen.toFixed(2)} €`;
+    document.getElementById("result").textContent = `Ergebnis (Rendite): ${rendite.toFixed(2)} €`;
+    document.getElementById("result-ohne-ruecklage").textContent = `Ergebnis ohne Instandhaltungsrücklage: ${renditeOhneRuecklage.toFixed(2)} €`;
+}
+
+function calculateRenditeFerien() {
+    const preis = parseFloat(document.getElementById("price_ferien").value) || 0;
+    const ruecklage = parseFloat(document.getElementById("ruecklage_ferien").value) || 0;
+    const abschlag = parseFloat(document.getElementById("abschlag").value) || 0;
+    const auslastungHaupt = parseFloat(document.getElementById("auslastung_haupt").value) || 0;
+    const auslastungNeben = parseFloat(document.getElementById("auslastung_neben").value) || 0;
+    let provisionssatz = parseFloat(document.getElementById("provision_satz").value);
+    if (isNaN(provisionssatz)) provisionssatz = 0.18;
+
+    const nebenpreis = preis * (1 - abschlag);
+    document.getElementById("nebensaison_preis").textContent = nebenpreis.toFixed(2);
+    document.getElementById("hauptsaison_preis").textContent = preis.toFixed(2);
+
+    const tageMonat = 30;
+    const monate = 6;
+    const hauptNaechte = tageMonat * monate * auslastungHaupt;
+    const nebenNaechte = tageMonat * monate * auslastungNeben;
+
+    const einnahmenHaupt = preis * hauptNaechte;
+    const einnahmenNeben = nebenpreis * nebenNaechte;
+    const einnahmenGesamt = einnahmenHaupt + einnahmenNeben;
+    const einnahmenMonat = einnahmenGesamt / 12;
+
+    const provisionHaupt = preis * provisionssatz * hauptNaechte;
+    const provisionNeben = nebenpreis * provisionssatz * nebenNaechte;
+    const provisionMonat = (provisionHaupt + provisionNeben) / 12;
+
+    const ausgaben = 1000 + 39.6 + 84 + 30 + 60 + 8.5 + 10 + 35 + ruecklage + provisionMonat;
+    const rendite = einnahmenMonat - ausgaben;
+    const renditeOhneRuecklage = einnahmenMonat - (ausgaben - ruecklage);
+
+    document.getElementById("provision-list-item").innerHTML = `Provisionsgebühr Plattformen (Ø/Monat): ${provisionMonat.toFixed(2)} € <span class='small-info'>(18% pro Buchung im Durchschnitt über alle Plattformen hinweg)</span>`;
+    document.getElementById("provision_output").textContent = `(Ø/Monat: ${provisionMonat.toFixed(2)} €)`;
+    document.getElementById("ausgaben-betrag-ferien").textContent = `${ausgaben.toFixed(2)} €`;
+    document.getElementById("einnahmen_ferien").textContent = `Einnahmen / Monat: ${einnahmenMonat.toFixed(2)} €`;
+    document.getElementById("result_ferien").textContent = `Ergebnis (Rendite / Monat): ${rendite.toFixed(2)} €`;
+    document.getElementById("result-ohne-ruecklage-ferien").textContent = `Ergebnis ohne Instandhaltungsrücklage: ${renditeOhneRuecklage.toFixed(2)} €`;
+    document.getElementById("naechte_gesamt").innerHTML = `Gesamt vermietete Nächte: ${(hauptNaechte + nebenNaechte).toFixed(0)}<br>Hauptsaison: ${hauptNaechte.toFixed(0)}<br>Nebensaison: ${nebenNaechte.toFixed(0)}`;
+}
+</script>
+
+<!-- Bereich: Vermietung an Monteure -->
+<h1>Vermietung an Monteure</h1>
+<p style="font-size: 1.2em; border-bottom: 1px solid #ccc; padding-bottom: 5px;"><strong>Annahmen</strong></p>
+<p><strong>Ausgaben:</strong></p>
+<div class="info-box">
+  <ul>
+    <li>Annuität (Kreditrate Bank): 1000€</li>
+    <li>Strom: 33€</li>
+    <li>Gas: 70€</li>
+    <li>Wasser: 25€</li>
+    <li>Abwasser + Grundsteuer B: 50€</li>
+    <li>Schornsteinfeger: 8,50€</li>
+    <li>Müllgebühren: 10€</li>
+    <li>Versicherung: 35€</li>
+  </ul>
+  <label for="ruecklage">Instandhaltungsrücklage (€/Monat):</label>
+  <input type="number" id="ruecklage" value="170">
+  <p><strong>Gesamtausgaben: </strong><span id="ausgaben-betrag">—</span></p>
+</div>
+<div class="input-section">
+  <label for="price">Preis pro Monteur (€/Tag):</label>
+  <input type="number" id="price" step="0.01" value="15">
+
+  <label for="tage">Belegungstage pro Monat:</label>
+  <input type="number" id="tage" value="25">
+
+  <button class="calculate-button" onclick="calculateRendite()">Berechne Rendite</button>
+  <div style="margin-top: 15px;" id="einnahmen">Einnahmen: </div>
+  <div id="result">Ergebnis (Rendite): </div>
+  <div id="result-ohne-ruecklage" style="margin-top: 10px; font-weight: bold; color: #555;">Ergebnis ohne Instandhaltungsrücklage: </div>
+</div>
+<hr style="margin: 40px 0;">
+
+<!-- Bereich: Vermietung an Feriengäste -->
+<h1>Vermietung an Feriengäste</h1>
+<p style="font-size: 1.2em; border-bottom: 1px solid #ccc; padding-bottom: 5px;"><strong>Annahmen</strong></p>
+<p><strong>Ausgaben:</strong></p>
+<div class="info-box">
+  <ul>
+    <li>Annuität (Kreditrate Bank): 1000€</li>
+    <li>Strom: 39,60€ <span class="small-info">(Wegen Feriengäste um 20% erhöht)</span></li>
+    <li>Gas: 84,00€ <span class="small-info">(Wegen Feriengäste um 20% erhöht)</span></li>
+    <li>Wasser: 30,00€ <span class="small-info">(Wegen Feriengäste um 20% erhöht)</span></li>
+    <li>Abwasser + Grundsteuer B: 60,00€ <span class="small-info">(Wegen Feriengäste um 20% erhöht)</span></li>
+    <li>Schornsteinfeger: 8,50€</li>
+    <li>Müllgebühren: 10€</li>
+    <li>Versicherung: 35€</li>
+    <li id="provision-list-item">Provisionsgebühr Plattformen (Ø/Monat): — <span class="small-info">(18% pro Buchung im Durchschnitt über alle Plattformen hinweg)</span></li>
+  </ul>
+  <label for="ruecklage_ferien">Instandhaltungsrücklage (€/Monat):</label>
+  <input type="number" id="ruecklage_ferien" value="170">
+  <p><strong>Gesamtausgaben: </strong><span id="ausgaben-betrag-ferien">—</span></p>
+</div>
+<div class="input-section" id="ferien-input-section">
+  <label for="price_ferien">Preis pro Nacht Hauptsaison:</label>
+  <input type="number" id="price_ferien" value="70">
+
+  <label for="abschlag">Nebensaison-Abschlag:</label>
+  <select id="abschlag">
+    <option value="0.00">0%</option>
+    <option value="0.05">5%</option>
+    <option value="0.10">10%</option>
+    <option value="0.15">15%</option>
+    <option value="0.20">20%</option>
+    <option value="0.25" selected>25%</option>
+    <option value="0.30">30%</option>
+    <option value="0.35">35%</option>
+    <option value="0.40">40%</option>
+    <option value="0.45">45%</option>
+    <option value="0.50">50%</option>
+  </select>
+
+  <p><strong>Hauptsaisonpreis:</strong> <span id="hauptsaison_preis">70.00</span> €</p>
+  <p><strong>Nebensaisonpreis:</strong> <span id="nebensaison_preis">—</span> €</p>
+
+  <label for="auslastung_haupt">Auslastung Hauptsaison:</label>
+  <select id="auslastung_haupt">
+    <option value="0.00">0%</option>
+    <option value="0.05">5%</option>
+    <option value="0.10">10%</option>
+    <option value="0.15">15%</option>
+    <option value="0.20">20%</option>
+    <option value="0.25">25%</option>
+    <option value="0.30">30%</option>
+    <option value="0.35">35%</option>
+    <option value="0.40">40%</option>
+    <option value="0.45">45%</option>
+    <option value="0.50">50%</option>
+    <option value="0.55">55%</option>
+    <option value="0.60">60%</option>
+    <option value="0.65">65%</option>
+    <option value="0.70">70%</option>
+    <option value="0.75">75%</option>
+    <option value="0.80">80%</option>
+    <option value="0.85">85%</option>
+    <option value="0.90" selected>90%</option>
+    <option value="0.95">95%</option>
+    <option value="1.00">100%</option>
+  </select>
+
+  <label for="auslastung_neben">Auslastung Nebensaison:</label>
+  <select id="auslastung_neben">
+    <option value="0.00">0%</option>
+    <option value="0.05">5%</option>
+    <option value="0.10">10%</option>
+    <option value="0.15">15%</option>
+    <option value="0.20">20%</option>
+    <option value="0.25">25%</option>
+    <option value="0.30">30%</option>
+    <option value="0.35">35%</option>
+    <option value="0.40">40%</option>
+    <option value="0.45">45%</option>
+    <option value="0.50">50%</option>
+    <option value="0.55">55%</option>
+    <option value="0.60" selected>60%</option>
+    <option value="0.65">65%</option>
+    <option value="0.70">70%</option>
+    <option value="0.75">75%</option>
+    <option value="0.80">80%</option>
+    <option value="0.85">85%</option>
+    <option value="0.90">90%</option>
+    <option value="0.95">95%</option>
+    <option value="1.00">100%</option>
+  </select>
+
+  <label for="provision_satz">Provisionssatz Plattformen:</label>
+<div style="display: flex; align-items: center; gap: 10px;">
+  <select id="provision_satz">
+    <option value="0.00">0%</option>
+    <option value="0.01">1%</option>
+    <option value="0.02">2%</option>
+    <option value="0.03">3%</option>
+    <option value="0.04">4%</option>
+    <option value="0.05">5%</option>
+    <option value="0.06">6%</option>
+    <option value="0.07">7%</option>
+    <option value="0.08">8%</option>
+    <option value="0.09">9%</option>
+    <option value="0.10">10%</option>
+    <option value="0.11">11%</option>
+    <option value="0.12">12%</option>
+    <option value="0.13">13%</option>
+    <option value="0.14">14%</option>
+    <option value="0.15">15%</option>
+    <option value="0.16">16%</option>
+    <option value="0.17">17%</option>
+    <option value="0.18" selected>18%</option>
+    <option value="0.19">19%</option>
+    <option value="0.20">20%</option>
+</select>
+  <span id="provision_output" style="font-size: 0.9em; color: #333; font-weight: bold;">(Ø/Monat: — €)</span>
+</div>
+
+  <button class="calculate-button" onclick="calculateRenditeFerien()">Berechne Rendite</button>
+  <div style="margin-top: 15px;" id="einnahmen_ferien">Einnahmen: </div>
+  <div id="result_ferien">Ergebnis (Rendite / Monat): </div>
+  <div id="result-ohne-ruecklage-ferien" style="margin-top: 10px; font-weight: bold; color: #555;">Ergebnis ohne Instandhaltungsrücklage: </div>
+  <div id="naechte_gesamt" style="margin-top: 10px; font-weight: bold;">Gesamt vermietete Nächte: —</div>
+</div>
+</body>
+</html>
